@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ch. 24 Cash Flows Jeopardy</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Barlow:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:    #0a1628;
+    --blue:    #0e3a7a;
+    --mid:     #1755b8;
+    --gold:    #f5c518;
+    --gold2:   #d4a017;
+    --white:   #ffffff;
+    --used:    #0d1f38;
+    --used-border: #1a3050;
+    --green:   #1a7a3c;
+    --red:     #8b0000;
+    --gray:    #c8c8c8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--navy);
+    font-family: 'Barlow', sans-serif;
+    color: var(--white);
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; width: 100vw; height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ── TITLE SCREEN ── */
+  #title-screen {
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 50% 30%, #1a3a6e 0%, var(--navy) 70%);
+    gap: 0;
+  }
+  .title-banner {
+    background: var(--gold);
+    padding: 18px 80px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    transform: skewX(-2deg);
+  }
+  .title-banner h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(52px, 8vw, 96px);
+    color: var(--navy);
+    letter-spacing: 6px;
+    transform: skewX(2deg);
+  }
+  .title-subtitle {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(14px, 2vw, 22px);
+    color: var(--gold);
+    letter-spacing: 3px;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+  .title-sub2 {
+    font-size: 15px;
+    color: #8aa4c8;
+    font-style: italic;
+    margin-bottom: 36px;
+    text-align: center;
+  }
+  .title-rules {
+    font-size: 13px;
+    color: #7a94b8;
+    max-width: 600px;
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 32px;
+    padding: 0 20px;
+  }
+  .btn-start {
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    letter-spacing: 3px;
+    padding: 14px 48px;
+    background: var(--mid);
+    color: var(--gold);
+    border: 2px solid var(--gold2);
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+  .btn-start:hover { background: var(--gold); color: var(--navy); transform: translateY(-2px); }
+
+  /* ── BOARD SCREEN ── */
+  #board-screen {
+    padding: 10px 10px 6px;
+    background: var(--navy);
+  }
+  .board-header {
+    background: var(--blue);
+    text-align: center;
+    padding: 7px;
+    font-family: 'Cinzel', serif;
+    font-size: clamp(11px, 1.5vw, 16px);
+    color: var(--gold);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+  }
+  .board-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: auto repeat(5, 1fr);
+    gap: 6px;
+    flex: 1;
+    min-height: 0;
+  }
+  .cat-header {
+    background: var(--mid);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8px 4px;
+    font-family: 'Cinzel', serif;
+    font-size: clamp(9px, 1.1vw, 13px);
+    color: var(--gold);
+    line-height: 1.3;
+    letter-spacing: 1px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+  }
+  .tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: clamp(16px, 2.8vw, 36px);
+    font-weight: 900;
+    color: var(--gold);
+    background: var(--mid);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+    transition: all 0.15s ease;
+    border: 1.5px solid rgba(255,255,255,0.06);
+    position: relative;
+    user-select: none;
+  }
+  .tile:hover:not(.used) {
+    background: #1e6ad4;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    color: #ffe066;
+  }
+  .tile.dd {
+    background: var(--red);
+    font-size: clamp(13px, 1.8vw, 22px);
+    letter-spacing: 2px;
+  }
+  .tile.dd:hover:not(.used) { background: #b30000; }
+  .tile.used {
+    background: var(--used);
+    border-color: var(--used-border);
+    cursor: default;
+    box-shadow: none;
+    transform: none !important;
+  }
+  .tile.used .tile-check {
+    display: block;
+  }
+  .tile-check {
+    display: none;
+    font-size: clamp(20px, 3vw, 40px);
+    color: #1e3a5a;
+  }
+  .board-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+  .btn-final {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    padding: 7px 32px;
+    background: var(--red);
+    color: var(--gold);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.4);
+  }
+  .btn-final:hover { background: #a50000; transform: translateY(-1px); }
+
+  /* ── QUESTION MODAL ── */
+  #modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(5,12,28,0.92);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #modal-overlay.active { display: flex; }
+  .modal-box {
+    background: var(--blue);
+    width: 100%;
+    max-width: 860px;
+    min-height: 380px;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    animation: modalIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes modalIn {
+    from { opacity:0; transform: scale(0.88) translateY(20px); }
+    to   { opacity:1; transform: scale(1)    translateY(0); }
+  }
+  .modal-header {
+    background: var(--navy);
+    padding: 12px 20px;
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    color: var(--gold);
+    letter-spacing: 2px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .modal-dd-badge {
+    background: var(--red);
+    color: var(--gold);
+    font-size: 11px;
+    padding: 3px 10px;
+    letter-spacing: 2px;
+    font-family: 'Cinzel', serif;
+  }
+  .modal-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 40px;
+    text-align: center;
+  }
+  .modal-clue {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(18px, 3vw, 30px);
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.45;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  .modal-answer-box {
+    background: var(--green);
+    padding: 24px 40px;
+    text-align: center;
+    display: none;
+    animation: fadeIn 0.3s ease;
+    flex-shrink: 0;
+  }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  .modal-answer-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 8px;
+    font-family: 'Barlow', sans-serif;
+  }
+  .modal-answer-text {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(16px, 2.4vw, 26px);
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.5;
+  }
+  .modal-footer {
+    padding: 12px 20px;
+    background: var(--navy);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .modal-prompt {
+    font-size: 14px;
+    font-style: italic;
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+  }
+  .btn-reveal {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    padding: 9px 28px;
+    background: var(--green);
+    color: var(--white);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-reveal:hover { background: #229a4e; }
+  .btn-back {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    padding: 9px 28px;
+    background: var(--mid);
+    color: var(--white);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-back:hover { background: #1e6ad4; }
+
+  /* ── DAILY DOUBLE SPLASH ── */
+  #dd-splash {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(8,0,0,0.95);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+  }
+  #dd-splash.active { display: flex; animation: modalIn 0.3s ease; }
+  .dd-banner {
+    background: var(--red);
+    padding: 20px 60px;
+    box-shadow: 0 0 60px rgba(180,0,0,0.5);
+  }
+  .dd-banner h2 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(36px, 6vw, 72px);
+    color: var(--gold);
+    letter-spacing: 6px;
+    text-align: center;
+  }
+  .dd-info {
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    color: var(--white);
+    letter-spacing: 2px;
+    text-align: center;
+  }
+  .btn-dd-continue {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    letter-spacing: 3px;
+    padding: 12px 40px;
+    background: var(--mid);
+    color: var(--gold);
+    border: 2px solid var(--gold2);
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+  }
+  .btn-dd-continue:hover { background: var(--gold); color: var(--navy); }
+
+  /* ── FINAL JEOPARDY ── */
+  #final-screen {
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 50% 40%, #2a0808 0%, var(--navy) 65%);
+    gap: 24px;
+    padding: 30px;
+    text-align: center;
+  }
+  .final-label {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(28px, 5vw, 56px);
+    color: var(--gold);
+    letter-spacing: 6px;
+    text-shadow: 0 0 30px rgba(245,197,24,0.3);
+  }
+  .final-cat-box {
+    background: var(--mid);
+    padding: 18px 60px;
+    box-shadow: 0 6px 30px rgba(0,0,0,0.5);
+  }
+  .final-cat-text {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(20px, 3.5vw, 40px);
+    color: var(--white);
+    letter-spacing: 3px;
+  }
+  .final-clue-box {
+    background: var(--navy);
+    border: 2px solid var(--blue);
+    padding: 28px 48px;
+    max-width: 800px;
+    font-family: 'Cinzel', serif;
+    font-size: clamp(15px, 2.2vw, 22px);
+    color: var(--white);
+    line-height: 1.6;
+    display: none;
+  }
+  .final-answer-box {
+    background: var(--green);
+    padding: 24px 48px;
+    max-width: 800px;
+    font-family: 'Cinzel', serif;
+    font-size: clamp(14px, 2vw, 20px);
+    color: var(--white);
+    line-height: 1.7;
+    white-space: pre-line;
+    display: none;
+  }
+  .final-wager {
+    font-size: 14px;
+    color: var(--gold);
+    font-style: italic;
+    font-family: 'Barlow', sans-serif;
+  }
+  .btn-final-action {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    letter-spacing: 3px;
+    padding: 12px 40px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+  .btn-final-action.red  { background: var(--red);   color: var(--gold); }
+  .btn-final-action.grn  { background: var(--green);  color: var(--white); }
+  .btn-final-action.blue { background: var(--mid);   color: var(--white); }
+  .btn-final-action:hover { filter: brightness(1.15); transform: translateY(-2px); }
+
+  /* ── FULLSCREEN HINT ── */
+  .hint {
+    position: fixed;
+    bottom: 8px;
+    right: 12px;
+    font-size: 11px;
+    color: #2a4a6a;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════
+     TITLE SCREEN
+══════════════════════════════════════════════════════════════ -->
+<div id="title-screen" class="screen active">
+  <div class="title-banner"><h1>JEOPARDY!</h1></div>
+  <p class="title-subtitle">Chapter 24 · The Statement of Cash Flows</p>
+  <p class="title-sub2">Indirect Method Only</p>
+  <p class="title-rules">
+    Teams take turns choosing a category &amp; dollar amount &nbsp;|&nbsp;
+    Answer must be in the form of a question &nbsp;|&nbsp;
+    Watch for the Daily Double!
+  </p>
+  <button class="btn-start" onclick="showBoard()">▶ &nbsp; START GAME</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     BOARD SCREEN
+══════════════════════════════════════════════════════════════ -->
+<div id="board-screen" class="screen">
+  <div class="board-header">Chapter 24 Cash Flows Jeopardy &nbsp;—&nbsp; Click a dollar amount</div>
+  <div class="board-grid" id="board-grid">
+    <!-- Built by JS -->
+  </div>
+  <div class="board-footer">
+    <button class="btn-final" onclick="showFinal()">★ &nbsp; FINAL JEOPARDY &nbsp; ★</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     DAILY DOUBLE SPLASH
+══════════════════════════════════════════════════════════════ -->
+<div id="dd-splash">
+  <div class="dd-banner"><h2>★ &nbsp;DAILY DOUBLE&nbsp; ★</h2></div>
+  <p class="dd-info" id="dd-info"></p>
+  <p class="final-wager">Make your wager, then reveal the clue.</p>
+  <button class="btn-dd-continue" id="dd-continue-btn">REVEAL CLUE &nbsp; ▶</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     QUESTION MODAL
+══════════════════════════════════════════════════════════════ -->
+<div id="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span id="modal-title"></span>
+      <span id="modal-dd-badge" class="modal-dd-badge" style="display:none">★ DAILY DOUBLE ★</span>
+    </div>
+    <div class="modal-body">
+      <p class="modal-clue" id="modal-clue"></p>
+    </div>
+    <div class="modal-answer-box" id="modal-answer-box">
+      <p class="modal-answer-label">ANSWER</p>
+      <p class="modal-answer-text" id="modal-answer"></p>
+    </div>
+    <div class="modal-footer">
+      <p class="modal-prompt">What is…?</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn-reveal" id="btn-reveal" onclick="revealAnswer()">REVEAL ANSWER &nbsp;▶</button>
+        <button class="btn-back"   id="btn-back"   onclick="closeModal()" style="display:none">⬅ &nbsp;BACK TO BOARD</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     FINAL JEOPARDY SCREEN
+══════════════════════════════════════════════════════════════ -->
+<div id="final-screen" class="screen">
+  <p class="final-label">FINAL JEOPARDY</p>
+  <div class="final-cat-box"><p class="final-cat-text" id="final-cat"></p></div>
+  <p class="final-wager" id="final-step-hint">Write your wager — then reveal the clue.</p>
+  <div class="final-clue-box" id="final-clue-box"></div>
+  <div class="final-answer-box" id="final-answer-box"></div>
+  <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">
+    <button class="btn-final-action red"  id="final-btn-clue"   onclick="finalRevealClue()">REVEAL CLUE &nbsp;▶</button>
+    <button class="btn-final-action grn"  id="final-btn-answer" onclick="finalRevealAnswer()" style="display:none">REVEAL ANSWER &nbsp;▶</button>
+    <button class="btn-final-action blue" id="final-btn-board"  onclick="showBoard()"         style="display:none">⬅ &nbsp;BACK TO BOARD</button>
+  </div>
+</div>
+
+<p class="hint">Press F11 for fullscreen</p>
+
+<!-- ══════════════════════════════════════════════════════════════
+     GAME DATA  —  edit questions here for future chapters
+══════════════════════════════════════════════════════════════ -->
+<script>
+// ─────────────────────────────────────────────────────────────────
+//  CATEGORIES  (5 items)
+// ─────────────────────────────────────────────────────────────────
+const CATEGORIES = [
+  "THE THREE\nBUCKETS",
+  "ADD OR\nSUBTRACT?",
+  "SHOW ME\nTHE MATH",
+  "WHICH\nSECTION?",
+  "TRUE OR\nFALSE?",
+];
+
+// ─────────────────────────────────────────────────────────────────
+//  CLUES  — 5 categories × 5 point values
+//  DD_CAT / DD_ROW = which tile is the Daily Double (0-indexed)
+// ─────────────────────────────────────────────────────────────────
+const DD_CAT = 2, DD_ROW = 3;
+
+const CLUES = [
+  // ── Cat 0: THE THREE BUCKETS ──────────────────────────────────
+  [
+    { pts: 100, clue: "This bucket covers day-to-day business activities like collecting from customers and paying employees.",
+                answer: "What is OPERATING ACTIVITIES?" },
+    { pts: 200, clue: "Purchasing a new building or selling old equipment falls under this bucket.",
+                answer: "What is INVESTING ACTIVITIES?" },
+    { pts: 300, clue: "Issuing common stock, repaying a bank loan, and paying cash dividends all belong here.",
+                answer: "What is FINANCING ACTIVITIES?" },
+    { pts: 400, clue: "Interest PAID on bonds is reported here — NOT in financing activities.",
+                answer: "What is OPERATING ACTIVITIES?" },
+    { pts: 500, clue: "Collecting principal payments on a note receivable related to a long-term asset sale goes here, NOT operating activities.",
+                answer: "What is INVESTING ACTIVITIES?" },
+  ],
+  // ── Cat 1: ADD OR SUBTRACT? ───────────────────────────────────
+  [
+    { pts: 100, clue: "Depreciation expense is always ________ to net income under the indirect method because it is a noncash expense.",
+                answer: "What is ADDED?" },
+    { pts: 200, clue: "An INCREASE in Accounts Receivable is ________ from net income — sales were recorded but cash hasn't been collected yet.",
+                answer: "What is SUBTRACTED?" },
+    { pts: 300, clue: "A DECREASE in Merchandise Inventory is ________ to net income — more goods were sold than purchased for cash.",
+                answer: "What is ADDED?" },
+    { pts: 400, clue: "Amortization of a PREMIUM on bonds payable is ________ from net income because it boosted net income without a cash inflow.",
+                answer: "What is SUBTRACTED?" },
+    { pts: 500, clue: "A LOSS on the sale of equipment is ________ to net income in the operating section. The full cash proceeds appear separately in investing.",
+                answer: "What is ADDED?" },
+  ],
+  // ── Cat 2: SHOW ME THE MATH ───────────────────────────────────
+  [
+    { pts: 100, clue: "Net income is $40,000. Depreciation is $8,000. No other adjustments. Cash flows from operating activities = ?",
+                answer: "What is $48,000?\n($40,000 + $8,000)" },
+    { pts: 200, clue: "Net income $55,000. Depreciation $10,000. Accounts Receivable increased $6,000. Operating cash flow = ?",
+                answer: "What is $59,000?\n($55,000 + $10,000 − $6,000)" },
+    { pts: 300, clue: "Equipment cost $30,000. Accumulated depreciation $18,000. Sold for $15,000. The gain or loss on sale = ?",
+                answer: "What is a GAIN of $3,000?\nBook value = $12,000 · Sold for $15,000" },
+    { pts: 400, clue: "Operating CF: $72,000 · Purchased land $120,000 · Issued common stock $50,000 · Paid dividends $15,000. Net change in cash = ?",
+                answer: "What is −$13,000?\n$72,000 − $120,000 + $50,000 − $15,000" },
+    { pts: 500, clue: "Net income $80,000 · Depreciation $14,000 · AR increased $9,000 · Inventory decreased $5,000 · AP decreased $3,000. Operating CF = ?",
+                answer: "What is $87,000?\n$80,000 + $14,000 − $9,000 + $5,000 − $3,000" },
+  ],
+  // ── Cat 3: WHICH SECTION? ─────────────────────────────────────
+  [
+    { pts: 100, clue: "Paying cash dividends to common stockholders.",
+                answer: "What is FINANCING ACTIVITIES?\n(Cash outflow)" },
+    { pts: 200, clue: "Selling used office equipment for cash.",
+                answer: "What is INVESTING ACTIVITIES?\n(Cash inflow — disposal of long-term asset)" },
+    { pts: 300, clue: "Paying off the principal balance of a mortgage.",
+                answer: "What is FINANCING ACTIVITIES?\n(Cash outflow — repaying debt)" },
+    { pts: 400, clue: "Purchasing stocks of another corporation as a long-term investment.",
+                answer: "What is INVESTING ACTIVITIES?\n(Cash outflow — acquiring investment)" },
+    { pts: 500, clue: "Reselling treasury stock to a new investor for cash.",
+                answer: "What is FINANCING ACTIVITIES?\n(Cash inflow — equity transaction)" },
+  ],
+  // ── Cat 4: TRUE OR FALSE? ─────────────────────────────────────
+  [
+    { pts: 100, clue: "TRUE or FALSE: A gain on sale of equipment is ADDED to net income under the indirect method.",
+                answer: "FALSE! A gain is SUBTRACTED.\nThe full cash proceeds are already in investing activities." },
+    { pts: 200, clue: "TRUE or FALSE: The indirect method starts with net income and adjusts for noncash items and working capital changes.",
+                answer: "TRUE!\nThat is exactly the definition of the indirect method." },
+    { pts: 300, clue: "TRUE or FALSE: An increase in Accounts Payable is subtracted from net income in the operating section.",
+                answer: "FALSE! It is ADDED.\nAn increase in a current liability means cash hasn't been paid out yet." },
+    { pts: 400, clue: "TRUE or FALSE: Interest expense paid on bonds goes in the financing activities section.",
+                answer: "FALSE!\nInterest expense PAID is classified as OPERATING activities." },
+    { pts: 500, clue: "TRUE or FALSE: If a company reports a net loss, it cannot have positive cash flow from operating activities.",
+                answer: "FALSE!\nLarge noncash add-backs like depreciation can make operating CF positive even with a net loss." },
+  ],
+];
+
+// ─────────────────────────────────────────────────────────────────
+//  FINAL JEOPARDY
+// ─────────────────────────────────────────────────────────────────
+const FINAL = {
+  category: "THE BIG PICTURE",
+  clue:     "Name all three sections of the Statement of Cash Flows in the correct order, AND state the reconciliation formula that ties the statement together.",
+  answer:   "(1) Operating Activities\n(2) Investing Activities\n(3) Financing Activities\n\nFormula: Beginning Cash Balance + Net Cash Flow (Operating ± Investing ± Financing) = Ending Cash Balance",
+};
+
+// ─────────────────────────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────────────────────────
+const used = Array.from({length:5}, () => Array(5).fill(false));
+let currentCat, currentRow;
+
+// ─────────────────────────────────────────────────────────────────
+//  BUILD BOARD
+// ─────────────────────────────────────────────────────────────────
+function buildBoard() {
+  const grid = document.getElementById('board-grid');
+  grid.innerHTML = '';
+
+  // Category headers
+  CATEGORIES.forEach(cat => {
+    const div = document.createElement('div');
+    div.className = 'cat-header';
+    div.textContent = cat.replace('\n', ' ');
+    grid.appendChild(div);
+  });
+
+  // Tiles — row by row
+  for (let row = 0; row < 5; row++) {
+    for (let cat = 0; cat < 5; cat++) {
+      const q   = CLUES[cat][row];
+      const isDD   = cat === DD_CAT && row === DD_ROW;
+      const isUsed = used[cat][row];
+
+      const tile = document.createElement('div');
+      tile.className = 'tile' + (isDD ? ' dd' : '') + (isUsed ? ' used' : '');
+      tile.id = `tile-${cat}-${row}`;
+
+      if (isUsed) {
+        const check = document.createElement('span');
+        check.className = 'tile-check';
+        check.textContent = '✓';
+        tile.appendChild(check);
+      } else {
+        tile.textContent = isDD ? '★ DD ★' : `$${q.pts}`;
+        tile.onclick = () => openQuestion(cat, row);
+      }
+
+      grid.appendChild(tile);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+//  NAVIGATION
+// ─────────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showBoard() {
+  buildBoard();
+  showScreen('board-screen');
+}
+
+// ─────────────────────────────────────────────────────────────────
+//  OPEN QUESTION
+// ─────────────────────────────────────────────────────────────────
+function openQuestion(cat, row) {
+  if (used[cat][row]) return;
+  currentCat = cat;
+  currentRow = row;
+
+  const isDD = cat === DD_CAT && row === DD_ROW;
+
+  if (isDD) {
+    // Show Daily Double splash first
+    document.getElementById('dd-info').textContent =
+      `Category: ${CATEGORIES[cat].replace('\n',' ')}  ·  Base Value: $${CLUES[cat][row].pts}`;
+    document.getElementById('dd-splash').classList.add('active');
+    document.getElementById('dd-continue-btn').onclick = () => {
+      document.getElementById('dd-splash').classList.remove('active');
+      showModal(cat, row);
+    };
+  } else {
+    showModal(cat, row);
+  }
+}
+
+function showModal(cat, row) {
+  const q    = CLUES[cat][row];
+  const isDD = cat === DD_CAT && row === DD_ROW;
+
+  document.getElementById('modal-title').textContent =
+    `${CATEGORIES[cat].replace('\n',' ')}  ·  $${q.pts}`;
+  document.getElementById('modal-dd-badge').style.display = isDD ? 'inline' : 'none';
+  document.getElementById('modal-clue').textContent = q.clue;
+  document.getElementById('modal-answer').textContent = q.answer;
+  document.getElementById('modal-answer-box').style.display = 'none';
+  document.getElementById('btn-reveal').style.display = 'inline-block';
+  document.getElementById('btn-back').style.display   = 'none';
+
+  document.getElementById('modal-overlay').classList.add('active');
+}
+
+function revealAnswer() {
+  document.getElementById('modal-answer-box').style.display = 'block';
+  document.getElementById('btn-reveal').style.display = 'none';
+  document.getElementById('btn-back').style.display   = 'inline-block';
+}
+
+function closeModal() {
+  // Mark tile as used BEFORE rebuilding the board
+  used[currentCat][currentRow] = true;
+  document.getElementById('modal-overlay').classList.remove('active');
+  buildBoard();   // rebuilds with the newly-used tile dark
+}
+
+// ─────────────────────────────────────────────────────────────────
+//  FINAL JEOPARDY
+// ─────────────────────────────────────────────────────────────────
+function showFinal() {
+  document.getElementById('final-cat').textContent = FINAL.category;
+  document.getElementById('final-clue-box').textContent  = FINAL.clue;
+  document.getElementById('final-answer-box').textContent = FINAL.answer;
+  document.getElementById('final-clue-box').style.display   = 'none';
+  document.getElementById('final-answer-box').style.display = 'none';
+  document.getElementById('final-btn-clue').style.display   = 'inline-block';
+  document.getElementById('final-btn-answer').style.display = 'none';
+  document.getElementById('final-btn-board').style.display  = 'none';
+  document.getElementById('final-step-hint').textContent    = 'Write your wager — then reveal the clue.';
+  showScreen('final-screen');
+}
+
+function finalRevealClue() {
+  document.getElementById('final-clue-box').style.display   = 'block';
+  document.getElementById('final-btn-clue').style.display   = 'none';
+  document.getElementById('final-btn-answer').style.display = 'inline-block';
+  document.getElementById('final-step-hint').textContent    = 'What is…?';
+}
+
+function finalRevealAnswer() {
+  document.getElementById('final-answer-box').style.display = 'block';
+  document.getElementById('final-btn-answer').style.display = 'none';
+  document.getElementById('final-btn-board').style.display  = 'inline-block';
+  document.getElementById('final-step-hint').textContent    = '';
+}
+
+// ─────────────────────────────────────────────────────────────────
+//  KEYBOARD SHORTCUTS
+//  Space/Enter = reveal answer or close modal
+//  Escape = close modal / back to board
+// ─────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  const overlay = document.getElementById('modal-overlay');
+  if (!overlay.classList.contains('active')) return;
+
+  if (e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault();
+    const revealBtn = document.getElementById('btn-reveal');
+    const backBtn   = document.getElementById('btn-back');
+    if (revealBtn.style.display !== 'none') revealAnswer();
+    else if (backBtn.style.display !== 'none') closeModal();
+  }
+  if (e.key === 'Escape') {
+    const backBtn = document.getElementById('btn-back');
+    if (backBtn.style.display !== 'none') closeModal();
+  }
+});
+</script>
+</body>
+</html>

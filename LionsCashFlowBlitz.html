@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lions Cash Flow Blitz</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:   #0d1b2e;
+  --navy2:  #162540;
+  --navy3:  #1e3358;
+  --gold:   #f0b400;
+  --gold2:  #ffd24d;
+  --gold3:  #c89200;
+  --white:  #f8f6f0;
+  --gray:   #8a9ab5;
+  --green:  #1a7a3c;
+  --red:    #c0392b;
+  --op:     #1755b8;
+  --inv:    #167a45;
+  --fin:    #8b1a8b;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--navy);
+  font-family: 'Barlow', sans-serif;
+  color: var(--white);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── BACKGROUND TEXTURE ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 80%, rgba(240,180,0,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(23,85,184,0.08) 0%, transparent 50%);
+  pointer-events: none; z-index: 0;
+}
+
+/* Lion silhouette watermark */
+body::after {
+  content: '🦁';
+  position: fixed;
+  bottom: -20px; right: -20px;
+  font-size: 280px;
+  opacity: 0.04;
+  pointer-events: none;
+  z-index: 0;
+  user-select: none;
+}
+
+/* ── SCREENS ── */
+.screen { display: none; position: relative; z-index: 1; }
+.screen.active { display: block; }
+
+/* ══════════════════════════════════════════
+   TITLE SCREEN
+══════════════════════════════════════════ */
+#title-screen {
+  min-height: 100vh;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  text-align: center;
+}
+#title-screen.active { display: flex; }
+
+.lion-badge {
+  font-size: 72px;
+  margin-bottom: 8px;
+  animation: roar 3s ease-in-out infinite;
+}
+@keyframes roar {
+  0%,100% { transform: scale(1); }
+  50%      { transform: scale(1.08) rotate(-3deg); }
+}
+
+.title-eyebrow {
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  letter-spacing: 6px;
+  color: var(--gold3);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.title-main {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(52px, 10vw, 110px);
+  color: var(--gold);
+  line-height: 0.9;
+  letter-spacing: 4px;
+  text-shadow: 0 4px 30px rgba(240,180,0,0.3);
+  margin-bottom: 4px;
+}
+
+.title-sub {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(22px, 4vw, 40px);
+  color: var(--white);
+  letter-spacing: 8px;
+  margin-bottom: 28px;
+  opacity: 0.85;
+}
+
+/* Category legend */
+.legend {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px; letter-spacing: 1px;
+  color: var(--white); opacity: 0.8;
+}
+.legend-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+}
+.legend-dot.op  { background: var(--op); }
+.legend-dot.inv { background: var(--inv); }
+.legend-dot.fin { background: var(--fin); }
+
+/* Team setup */
+.setup-box {
+  background: var(--navy2);
+  border: 1px solid rgba(240,180,0,0.2);
+  padding: 28px 36px;
+  max-width: 520px; width: 100%;
+  margin-bottom: 28px;
+}
+.setup-box h3 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px; letter-spacing: 3px;
+  color: var(--gold); margin-bottom: 18px;
+  text-align: center;
+}
+.team-row {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+}
+.team-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px; letter-spacing: 1px;
+  color: var(--gray); width: 70px; flex-shrink: 0;
+}
+.team-input {
+  flex: 1; padding: 10px 14px;
+  background: var(--navy3); border: 1px solid rgba(240,180,0,0.25);
+  color: var(--white); font-family: 'Barlow', sans-serif; font-size: 15px;
+  outline: none; transition: border-color 0.2s;
+}
+.team-input:focus { border-color: var(--gold); }
+
+.btn-start {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px; letter-spacing: 5px;
+  padding: 14px 56px;
+  background: var(--gold);
+  color: var(--navy);
+  border: none; cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 6px 24px rgba(240,180,0,0.3);
+}
+.btn-start:hover { background: var(--gold2); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(240,180,0,0.4); }
+
+.how-to-play {
+  max-width: 480px;
+  font-size: 13px; color: var(--gray); line-height: 1.7;
+  margin-top: 20px; text-align: center;
+}
+.how-to-play strong { color: var(--gold); }
+
+/* ══════════════════════════════════════════
+   GAME SCREEN
+══════════════════════════════════════════ */
+#game-screen {
+  min-height: 100vh;
+  display: none; flex-direction: column;
+}
+#game-screen.active { display: flex; }
+
+/* ── TOP BAR ── */
+.top-bar {
+  background: var(--navy2);
+  border-bottom: 2px solid var(--gold3);
+  padding: 10px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-shrink: 0;
+}
+.top-bar-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px; letter-spacing: 3px; color: var(--gold);
+}
+.score-board {
+  display: flex; gap: 16px; align-items: center;
+}
+.score-team {
+  display: flex; flex-direction: column; align-items: center;
+  min-width: 90px;
+}
+.score-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px; letter-spacing: 2px; color: var(--gray);
+  margin-bottom: 2px; text-transform: uppercase;
+}
+.score-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px; color: var(--gold); line-height: 1;
+  transition: transform 0.3s;
+}
+.score-num.bump { animation: scoreBump 0.4s ease; }
+@keyframes scoreBump {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.35) translateY(-4px); color: var(--gold2); }
+  100% { transform: scale(1); }
+}
+.score-divider {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px; color: var(--navy3);
+}
+.progress-info {
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px; color: var(--gray); letter-spacing: 1px;
+  text-align: right;
+}
+
+/* ── MAIN CONTENT ── */
+.game-main {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+
+/* ── CARD ── */
+.card-arena {
+  perspective: 1200px;
+  width: min(600px, 95vw);
+  height: 300px;
+  margin-bottom: 28px;
+}
+.card-inner {
+  width: 100%; height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+.card-inner.flipped { transform: rotateY(180deg); }
+
+.card-face {
+  position: absolute; inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 32px;
+  box-shadow: 0 16px 60px rgba(0,0,0,0.5);
+}
+.card-front {
+  background: var(--navy2);
+  border: 2px solid rgba(240,180,0,0.25);
+  text-align: center;
+}
+.card-front .card-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px; letter-spacing: 3px; color: var(--gold3);
+  margin-bottom: 10px;
+}
+.card-front .card-question {
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(18px, 3.5vw, 26px);
+  font-weight: 500;
+  color: var(--white);
+  line-height: 1.4; text-align: center;
+}
+.card-front .card-hint {
+  font-size: 12px; color: var(--gray); margin-top: 14px;
+  font-style: italic;
+}
+
+.card-back {
+  transform: rotateY(180deg);
+  text-align: center;
+}
+.card-back.op  { background: #0e2e5c; border: 2px solid var(--op); }
+.card-back.inv { background: #0e2e1a; border: 2px solid var(--inv); }
+.card-back.fin { background: #2a0e2a; border: 2px solid var(--fin); }
+.card-back.bonus { background: #2a1e00; border: 2px solid var(--gold); }
+
+.answer-category {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(28px, 5vw, 48px);
+  letter-spacing: 4px;
+  margin-bottom: 6px;
+}
+.op  .answer-category  { color: #5a9aff; }
+.inv .answer-category  { color: #4adf8a; }
+.fin .answer-category  { color: #d880ff; }
+.bonus .answer-category { color: var(--gold); }
+
+.answer-direction {
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(16px, 3vw, 24px);
+  font-weight: 600; letter-spacing: 3px;
+  margin-bottom: 16px;
+}
+.inflow  { color: #4adf8a; }
+.outflow { color: #ff7a7a; }
+.special { color: var(--gold2); }
+
+.answer-explanation {
+  font-size: 13px; color: rgba(255,255,255,0.65);
+  line-height: 1.5; max-width: 400px; text-align: center;
+}
+
+/* ── BOTTOM PANEL ── */
+.bottom-panel {
+  width: min(700px, 95vw);
+  display: flex; flex-direction: column; gap: 14px;
+  align-items: center;
+}
+
+/* BID PHASE */
+.bid-phase { text-align: center; }
+.bid-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px; letter-spacing: 3px; color: var(--gold);
+  margin-bottom: 10px;
+}
+.active-team-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px; color: var(--white);
+  margin-bottom: 12px; letter-spacing: 2px;
+}
+.bid-buttons {
+  display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+}
+.bid-btn {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px; letter-spacing: 2px;
+  width: 72px; height: 72px;
+  border: 2px solid var(--gold3);
+  background: transparent; color: var(--gold);
+  cursor: pointer; transition: all 0.2s;
+  position: relative;
+}
+.bid-btn:hover { background: var(--gold); color: var(--navy); transform: scale(1.08); }
+.bid-sub { font-size: 9px; letter-spacing: 1px; display: block; margin-top: -4px; color: inherit; opacity: 0.7; }
+
+/* REVEAL PHASE */
+.reveal-phase { text-align: center; }
+.reveal-prompt {
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px; letter-spacing: 2px; color: var(--gray);
+  margin-bottom: 14px;
+}
+.current-bid-display {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px; color: var(--gold);
+  margin-bottom: 12px; letter-spacing: 2px;
+}
+
+.btn-flip {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px; letter-spacing: 4px;
+  padding: 14px 48px;
+  background: var(--gold); color: var(--navy);
+  border: none; cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 4px 20px rgba(240,180,0,0.3);
+}
+.btn-flip:hover { background: var(--gold2); transform: translateY(-2px); }
+
+/* SCORE PHASE */
+.score-phase { width: 100%; }
+.score-question {
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px; letter-spacing: 2px; color: var(--white);
+  text-align: center; margin-bottom: 16px;
+}
+.score-buttons {
+  display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+}
+.score-btn {
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px; letter-spacing: 2px;
+  padding: 12px 24px; border: none; cursor: pointer; transition: all 0.2s;
+  flex: 1; min-width: 140px; max-width: 200px;
+}
+.score-btn.correct   { background: var(--green);  color: var(--white); }
+.score-btn.incorrect { background: #7a2020;        color: var(--white); }
+.score-btn.correct:hover   { background: #229a4e; transform: translateY(-2px); }
+.score-btn.incorrect:hover { background: var(--red); transform: translateY(-2px); }
+
+/* ── FEEDBACK FLASH ── */
+#feedback-flash {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 80px; letter-spacing: 6px;
+  pointer-events: none; z-index: 200;
+  text-shadow: 0 0 40px currentColor;
+  opacity: 0;
+}
+#feedback-flash.show-correct {
+  color: #4adf8a;
+  animation: flashAnim 0.8s ease forwards;
+}
+#feedback-flash.show-incorrect {
+  color: #ff7a7a;
+  animation: flashAnim 0.8s ease forwards;
+}
+@keyframes flashAnim {
+  0%   { opacity:0; transform: translate(-50%,-50%) scale(0.5); }
+  30%  { opacity:1; transform: translate(-50%,-50%) scale(1.1); }
+  70%  { opacity:1; transform: translate(-50%,-50%) scale(1); }
+  100% { opacity:0; transform: translate(-50%,-50%) scale(0.8); }
+}
+
+/* ── PROGRESS BAR ── */
+.progress-bar-wrap {
+  width: 100%; height: 4px;
+  background: var(--navy3);
+  flex-shrink: 0;
+}
+.progress-bar-fill {
+  height: 100%; background: var(--gold);
+  transition: width 0.4s ease;
+}
+
+/* ── CATEGORY BADGE ── */
+.category-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px; letter-spacing: 2px;
+  padding: 4px 12px; margin-bottom: 14px;
+  text-transform: uppercase;
+}
+.category-badge.op  { background: rgba(23,85,184,0.3); color: #5a9aff; border: 1px solid rgba(23,85,184,0.5); }
+.category-badge.inv { background: rgba(22,122,69,0.3); color: #4adf8a; border: 1px solid rgba(22,122,69,0.5); }
+.category-badge.fin { background: rgba(139,26,139,0.3); color: #d880ff; border: 1px solid rgba(139,26,139,0.5); }
+.category-badge.bonus { background: rgba(240,180,0,0.2); color: var(--gold); border: 1px solid rgba(240,180,0,0.4); }
+
+/* ══════════════════════════════════════════
+   END SCREEN
+══════════════════════════════════════════ */
+#end-screen {
+  min-height: 100vh;
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 40px 20px; text-align: center;
+}
+#end-screen.active { display: flex; }
+
+.end-lion { font-size: 80px; margin-bottom: 16px; animation: roar 2s infinite; }
+.end-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(40px, 8vw, 80px);
+  color: var(--gold); letter-spacing: 6px; margin-bottom: 8px;
+}
+.end-sub {
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px; letter-spacing: 3px; color: var(--gray); margin-bottom: 32px;
+}
+.final-scores {
+  display: flex; gap: 24px; margin-bottom: 32px; flex-wrap: wrap; justify-content: center;
+}
+.final-score-card {
+  background: var(--navy2);
+  border: 1px solid rgba(240,180,0,0.2);
+  padding: 24px 40px; min-width: 160px;
+  transition: all 0.3s;
+}
+.final-score-card.winner {
+  border-color: var(--gold);
+  box-shadow: 0 0 40px rgba(240,180,0,0.2);
+  transform: scale(1.05);
+}
+.final-score-card .fs-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px; letter-spacing: 2px;
+  color: var(--gray); margin-bottom: 8px;
+}
+.final-score-card .fs-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 56px; color: var(--gold); line-height: 1;
+}
+.final-score-card.winner .fs-name { color: var(--gold); }
+.winner-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px; letter-spacing: 3px;
+  color: var(--gold2); margin-top: 6px;
+}
+
+.btn-play-again {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px; letter-spacing: 4px;
+  padding: 14px 48px; background: var(--gold);
+  color: var(--navy); border: none; cursor: pointer;
+  transition: all 0.2s; box-shadow: 0 6px 24px rgba(240,180,0,0.3);
+}
+.btn-play-again:hover { background: var(--gold2); transform: translateY(-3px); }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     TITLE SCREEN
+════════════════════════════════════════ -->
+<div id="title-screen" class="screen active">
+  <div class="lion-badge">🦁</div>
+  <p class="title-eyebrow">Accounting 2 · Chapter 24</p>
+  <h1 class="title-main">CASH FLOW</h1>
+  <p class="title-sub">BLITZ</p>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot op"></div> Operating</div>
+    <div class="legend-item"><div class="legend-dot inv"></div> Investing</div>
+    <div class="legend-item"><div class="legend-dot fin"></div> Financing</div>
+  </div>
+
+  <div class="setup-box">
+    <h3>⚡ SET UP YOUR TEAMS</h3>
+    <div class="team-row">
+      <span class="team-label">Team 1</span>
+      <input class="team-input" id="team1-name" type="text" placeholder="Lions Offense" maxlength="20">
+    </div>
+    <div class="team-row">
+      <span class="team-label">Team 2</span>
+      <input class="team-input" id="team2-name" type="text" placeholder="Lions Defense" maxlength="20">
+    </div>
+  </div>
+
+  <button class="btn-start" onclick="startGame()">LET'S GO LIONS &nbsp;▶</button>
+
+  <p class="how-to-play">
+    <strong>HOW TO PLAY:</strong> Each team takes turns. Before the card flips,
+    bid <strong>1, 2, or 3 points</strong> based on your confidence.
+    Correct = gain your bid · Wrong = lose your bid.
+    Highest score wins — GO LIONS! 🦁
+  </p>
+</div>
+
+<!-- ════════════════════════════════════════
+     GAME SCREEN
+════════════════════════════════════════ -->
+<div id="game-screen" class="screen">
+  <!-- progress bar -->
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress-bar"></div>
+  </div>
+
+  <!-- top bar -->
+  <div class="top-bar">
+    <div class="top-bar-title">🦁 CASH FLOW BLITZ</div>
+    <div class="score-board">
+      <div class="score-team">
+        <div class="score-name" id="t1-label">Team 1</div>
+        <div class="score-num"  id="t1-score">0</div>
+      </div>
+      <div class="score-divider">vs</div>
+      <div class="score-team">
+        <div class="score-name" id="t2-label">Team 2</div>
+        <div class="score-num"  id="t2-score">0</div>
+      </div>
+    </div>
+    <div class="progress-info" id="card-counter">Card 1 / 25</div>
+  </div>
+
+  <!-- main content -->
+  <div class="game-main">
+
+    <!-- card -->
+    <div class="card-arena">
+      <div class="card-inner" id="card-inner">
+
+        <!-- FRONT -->
+        <div class="card-face card-front" id="card-front">
+          <div class="card-num" id="card-num">CARD 1</div>
+          <div class="card-question" id="card-question">Loading...</div>
+          <div class="card-hint">Bid your points, then flip!</div>
+        </div>
+
+        <!-- BACK -->
+        <div class="card-face card-back" id="card-back">
+          <div class="category-badge" id="answer-badge">●</div>
+          <div class="answer-category" id="answer-type"></div>
+          <div class="answer-direction" id="answer-dir"></div>
+          <div class="answer-explanation" id="answer-explain"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- bottom panel — phases switch here -->
+    <div class="bottom-panel">
+
+      <!-- PHASE 1: BID -->
+      <div id="phase-bid" class="bid-phase">
+        <div class="active-team-label" id="active-team-display">Team 1's Turn</div>
+        <div class="bid-label">HOW CONFIDENT ARE YOU? BID YOUR POINTS:</div>
+        <div class="bid-buttons">
+          <button class="bid-btn" onclick="placeBid(1)">1<span class="bid-sub">LOW</span></button>
+          <button class="bid-btn" onclick="placeBid(2)">2<span class="bid-sub">MID</span></button>
+          <button class="bid-btn" onclick="placeBid(3)">3<span class="bid-sub">HIGH</span></button>
+        </div>
+      </div>
+
+      <!-- PHASE 2: REVEAL -->
+      <div id="phase-reveal" class="reveal-phase" style="display:none">
+        <div class="current-bid-display" id="bid-display">Bet: 2 points</div>
+        <div class="reveal-prompt">Ready? Flip the card to see the answer!</div>
+        <button class="btn-flip" onclick="flipCard()">🃏 &nbsp;FLIP CARD</button>
+      </div>
+
+      <!-- PHASE 3: SCORE -->
+      <div id="phase-score" class="score-phase" style="display:none">
+        <div class="score-question" id="score-question">Was the answer correct?</div>
+        <div class="score-buttons">
+          <button class="score-btn correct"   onclick="recordScore(true)">✅ &nbsp;CORRECT<br><small>+bid pts</small></button>
+          <button class="score-btn incorrect" onclick="recordScore(false)">❌ &nbsp;WRONG<br><small>−bid pts</small></button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- feedback flash -->
+<div id="feedback-flash"></div>
+
+<!-- ════════════════════════════════════════
+     END SCREEN
+════════════════════════════════════════ -->
+<div id="end-screen" class="screen">
+  <div class="end-lion">🦁</div>
+  <h2 class="end-title">GAME OVER</h2>
+  <p class="end-sub">FINAL SCORES</p>
+  <div class="final-scores" id="final-scores"></div>
+  <button class="btn-play-again" onclick="resetGame()">▶ &nbsp;PLAY AGAIN</button>
+</div>
+
+<!-- ════════════════════════════════════════
+     CARD DATA  (edit here for new units)
+════════════════════════════════════════ -->
+<script>
+// type: 'op' | 'inv' | 'fin' | 'bonus'
+// dir: 'inflow' | 'outflow' | 'special'
+const CARDS = [
+  // ── OPERATING ────────────────────────────────────────────────
+  { q: "Paid rent for office space",
+    type:"op", dir:"outflow",
+    explain:"Day-to-day operating expense → Operating, Outflow" },
+  { q: "Received cash from customers for services provided",
+    type:"op", dir:"inflow",
+    explain:"Core revenue collection → Operating, Inflow" },
+  { q: "Paid for utilities (electricity, water, internet)",
+    type:"op", dir:"outflow",
+    explain:"Routine operating cost → Operating, Outflow" },
+  { q: "Paid suppliers for inventory purchases",
+    type:"op", dir:"outflow",
+    explain:"Buying inventory is an operating activity → Outflow" },
+  { q: "Collected cash on accounts receivable",
+    type:"op", dir:"inflow",
+    explain:"Collecting A/R is part of daily operations → Operating, Inflow" },
+  { q: "Paid wages to employees",
+    type:"op", dir:"outflow",
+    explain:"Salaries are a core operating expense → Outflow" },
+  { q: "Paid interest on a loan",
+    type:"op", dir:"outflow",
+    explain:"Interest expense paid = Operating, Outflow (NOT financing!)" },
+  { q: "Received a tax refund from the government",
+    type:"op", dir:"inflow",
+    explain:"Tax refunds relate to operating income → Operating, Inflow" },
+  // ── INVESTING ────────────────────────────────────────────────
+  { q: "Purchased new delivery trucks for the business",
+    type:"inv", dir:"outflow",
+    explain:"Buying long-term assets → Investing, Outflow" },
+  { q: "Sold a company-owned building for cash",
+    type:"inv", dir:"inflow",
+    explain:"Disposing of a long-term asset → Investing, Inflow" },
+  { q: "Bought shares of another company's stock as an investment",
+    type:"inv", dir:"outflow",
+    explain:"Acquiring an investment security → Investing, Outflow" },
+  { q: "Sold old equipment for cash",
+    type:"inv", dir:"inflow",
+    explain:"Selling long-term equipment → Investing, Inflow" },
+  { q: "Purchased land for a new facility",
+    type:"inv", dir:"outflow",
+    explain:"Land is a long-term asset → Investing, Outflow" },
+  { q: "Received cash from selling a patent",
+    type:"inv", dir:"inflow",
+    explain:"Selling an intangible long-term asset → Investing, Inflow" },
+  { q: "Paid for major renovations on an office building",
+    type:"inv", dir:"outflow",
+    explain:"Capital improvements to long-term assets → Investing, Outflow" },
+  // ── FINANCING ────────────────────────────────────────────────
+  { q: "Issued new common stock to raise capital",
+    type:"fin", dir:"inflow",
+    explain:"Equity issuance brings in cash → Financing, Inflow" },
+  { q: "Paid cash dividends to shareholders",
+    type:"fin", dir:"outflow",
+    explain:"Dividends to owners → Financing, Outflow" },
+  { q: "Borrowed money from a bank with a long-term loan",
+    type:"fin", dir:"inflow",
+    explain:"Taking on debt brings in cash → Financing, Inflow" },
+  { q: "Repaid principal on a long-term loan",
+    type:"fin", dir:"outflow",
+    explain:"Paying back debt principal → Financing, Outflow" },
+  { q: "Issued bonds payable to raise funds",
+    type:"fin", dir:"inflow",
+    explain:"Issuing bonds = borrowing money → Financing, Inflow" },
+  { q: "Repurchased company stock (treasury stock buyback)",
+    type:"fin", dir:"outflow",
+    explain:"Buying back equity → Financing, Outflow" },
+  { q: "Paid off a mortgage on a company-owned property",
+    type:"fin", dir:"outflow",
+    explain:"Mortgage principal repayment → Financing, Outflow" },
+  { q: "Obtained a line of credit and drew cash from it",
+    type:"fin", dir:"inflow",
+    explain:"Drawing on a credit line = borrowing → Financing, Inflow" },
+  // ── BONUS ─────────────────────────────────────────────────────
+  { q: "A company records depreciation expense. Does this appear directly on the Statement of Cash Flows?",
+    type:"bonus", dir:"special",
+    explain:"No direct cash effect. Added back to net income in Operating Activities under the indirect method." },
+  { q: "A company converts a long-term loan into common stock. How does this appear on the SCF?",
+    type:"bonus", dir:"special",
+    explain:"NONCASH transaction — disclosed in the footnotes. Not reported as an inflow or outflow." },
+];
+
+// Shuffle helper
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+// Type labels / direction labels
+const TYPE_LABEL = { op:"Operating", inv:"Investing", fin:"Financing", bonus:"BONUS CHALLENGE" };
+const DIR_LABEL  = { inflow:"Cash Inflow  ↑", outflow:"Cash Outflow  ↓", special:"Special Rule" };
+const DIR_CLASS  = { inflow:"inflow", outflow:"outflow", special:"special" };
+const BADGE_LABEL = { op:"⚙ Operating", inv:"📈 Investing", fin:"💰 Financing", bonus:"⭐ Bonus" };
+
+// ── STATE ──
+let deck = [], cardIdx = 0, currentBid = 0, activeTeam = 0;
+let scores = [0, 0], teamNames = ["Team 1", "Team 2"];
+let phase = 'bid'; // 'bid' | 'reveal' | 'score'
+
+function startGame() {
+  teamNames[0] = document.getElementById('team1-name').value.trim() || 'Lions Offense';
+  teamNames[1] = document.getElementById('team2-name').value.trim() || 'Lions Defense';
+  document.getElementById('t1-label').textContent = teamNames[0];
+  document.getElementById('t2-label').textContent = teamNames[1];
+  scores = [0,0];
+  activeTeam = 0;
+  deck = shuffle(CARDS);
+  cardIdx = 0;
+  showScreen('game-screen');
+  loadCard();
+}
+
+function loadCard() {
+  if (cardIdx >= deck.length) { showEnd(); return; }
+  const c = deck[cardIdx];
+  // reset card
+  document.getElementById('card-inner').classList.remove('flipped');
+  // front
+  document.getElementById('card-num').textContent = `CARD ${cardIdx+1}`;
+  document.getElementById('card-question').textContent = c.q;
+  // back
+  const back = document.getElementById('card-back');
+  back.className = `card-face card-back ${c.type}`;
+  document.getElementById('answer-badge').className = `category-badge ${c.type}`;
+  document.getElementById('answer-badge').textContent = BADGE_LABEL[c.type];
+  document.getElementById('answer-type').textContent = TYPE_LABEL[c.type];
+  const dirEl = document.getElementById('answer-dir');
+  dirEl.textContent = DIR_LABEL[c.dir];
+  dirEl.className = `answer-direction ${DIR_CLASS[c.dir]}`;
+  document.getElementById('answer-explain').textContent = c.explain;
+  // progress
+  const pct = (cardIdx / deck.length) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('card-counter').textContent = `Card ${cardIdx+1} / ${deck.length}`;
+  // scores
+  updateScoreDisplay();
+  // active team
+  const name = teamNames[activeTeam];
+  document.getElementById('active-team-display').textContent = `${name}'s Turn`;
+  // phase
+  setPhase('bid');
+}
+
+function placeBid(n) {
+  currentBid = n;
+  document.getElementById('bid-display').textContent =
+    `${teamNames[activeTeam]} bet ${n} point${n>1?'s':''}`;
+  setPhase('reveal');
+}
+
+function flipCard() {
+  document.getElementById('card-inner').classList.add('flipped');
+  setPhase('score');
+  document.getElementById('score-question').textContent =
+    `Did ${teamNames[activeTeam]} get it right?`;
+}
+
+function recordScore(correct) {
+  const delta = correct ? currentBid : -currentBid;
+  scores[activeTeam] = Math.max(0, scores[activeTeam] + delta);
+  // flash feedback
+  const flash = document.getElementById('feedback-flash');
+  flash.textContent = correct ? '✓ CORRECT!' : '✗ WRONG!';
+  flash.className = '';
+  void flash.offsetWidth; // reflow
+  flash.className = correct ? 'show-correct' : 'show-incorrect';
+  // bump score
+  const scoreEl = document.getElementById(`t${activeTeam+1}-score`);
+  scoreEl.classList.remove('bump');
+  void scoreEl.offsetWidth;
+  scoreEl.classList.add('bump');
+  updateScoreDisplay();
+  // next
+  activeTeam = 1 - activeTeam;
+  cardIdx++;
+  setTimeout(() => loadCard(), 700);
+}
+
+function updateScoreDisplay() {
+  document.getElementById('t1-score').textContent = scores[0];
+  document.getElementById('t2-score').textContent = scores[1];
+}
+
+function setPhase(p) {
+  phase = p;
+  document.getElementById('phase-bid').style.display    = p==='bid'    ? 'block' : 'none';
+  document.getElementById('phase-reveal').style.display = p==='reveal' ? 'block' : 'none';
+  document.getElementById('phase-score').style.display  = p==='score'  ? 'block' : 'none';
+}
+
+function showEnd() {
+  const container = document.getElementById('final-scores');
+  container.innerHTML = '';
+  const winner = scores[0] > scores[1] ? 0 : (scores[1] > scores[0] ? 1 : -1);
+  [0,1].forEach(i => {
+    const card = document.createElement('div');
+    card.className = 'final-score-card' + (winner===i ? ' winner' : '');
+    card.innerHTML = `
+      <div class="fs-name">${teamNames[i]}</div>
+      <div class="fs-num">${scores[i]}</div>
+      ${winner===i ? '<div class="winner-label">🏆 WINNER!</div>' : ''}
+    `;
+    container.appendChild(card);
+  });
+  if (winner === -1) {
+    const tie = document.createElement('p');
+    tie.style.cssText = 'color:var(--gold);font-family:Bebas Neue,serif;font-size:28px;letter-spacing:4px;margin-top:16px;';
+    tie.textContent = "🤝 IT'S A TIE!";
+    container.appendChild(tie);
+  }
+  showScreen('end-screen');
+}
+
+function resetGame() { showScreen('title-screen'); }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+    s.style.display = '';
+  });
+  const el = document.getElementById(id);
+  el.classList.add('active');
+}
+
+// Keyboard: Space to bid 2 (quick-play) or advance phases
+document.addEventListener('keydown', e => {
+  if (e.key === ' ') {
+    e.preventDefault();
+    if (phase === 'bid')    placeBid(2);
+    else if (phase === 'reveal') flipCard();
+  }
+});
+</script>
+</body>
+</html>
